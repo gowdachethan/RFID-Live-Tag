@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+
+	<head lang="en">
+		<meta charset="UTF-8">
+		<title>RFID Inventory</title>
+		<link rel="stylesheet" href="css/common.css" />
+		<link rel="stylesheet" href="css/iframe.css" />
+		<script src="js/jquery.min.js"></script>
+		<script src="js/utility.js"></script>
+	</head>
+
+	<body>
+		<div class="box">
+
+			<div class="content-table">
+				<div class="main-top clearfix">
+					<div class="bottom-btn clearfix" style="margin-top: 5px;">
+						<input type="button" id="btnstartinv" value="Start Inventory" onclick="startinventory()" />
+						<input type="button" value="Stop Inventory" onclick="stopinventory()" />
+						<input type="button" value="Clear List" onclick="cleartaglist()" />
+					</div>
+
+					<p id="totaltagcnt">Total Tags:&nbsp;&nbsp;&nbsp;0000</p>
+					<p id="hbcount">Heartbeat:&nbsp;&nbsp;&nbsp;0000</p>
+					<p id="gpistates">GPI States:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+					<p id="devstate">Device State:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+				</div>
+
+				<div class="table-box">
+					<div class="table-head">
+						<table cellspacing="0" cellpadding="0">
+							<colgroup>
+								<col style="width:4%">
+								<col style="width:4.5%">
+								<col>
+								<col style="width:3.5%">
+								<col style="width:20%">
+								<col style="width:4%">
+								<col style="width:5%">
+								<col style="width:6%">
+								<col style="width:10%">
+								<col style="width:6%">
+								<col style="width:6%">
+							</colgroup>
+							<thead>
+								<tr>
+									<th id="titlenb" class="sorttitle textnoselect">No.</th>
+									<th id="titlereadcnt" class="sorttitle textnoselect">Read Count</th>
+									<th id="titleepc" class="sorttitle textnoselect">EPC ID</th>
+									<th id="titleant" class="sorttitle textnoselect">Antenna</th>
+									<th id="titleemddata" class="sorttitle textnoselect">Embedded Data</th>
+									<th id="titlepotl" class="sorttitle textnoselect">Protocol</th>
+									<th id="titlerssi" class="sorttitle textnoselect">RSSI (dBm)</th>
+									<th id="titlefreq" class="sorttitle textnoselect">Frequency</th>
+									<th id="titlerevd" class="sorttitle textnoselect">Phase</th>
+									<th id="titleftm" class="sorttitle textnoselect">First Seen</th>
+									<th id="titleltm" class="sorttitle textnoselect">Last Seen</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+					<div class="table-body">
+						<div>
+							<table cellspacing="0" cellpadding="0">
+								<colgroup>
+									<col style="width:4%">
+									<col style="width:4.5%">
+									<col>
+									<col style="width:3.5%">
+									<col style="width:20%">
+									<col style="width:4%">
+									<col style="width:5%">
+									<col style="width:6%">
+									<col style="width:10%">
+									<col style="width:6%">
+									<col style="width:6%">
+								</colgroup>
+								<tbody id="taglist">
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</body>
+
+</html>
+<script>
+	$(function () {
+		$('.table-box').scroll(function () {
+			var headTop = $('.table-box').scrollTop();
+			$('.table-head').css("top", headTop + 'px');
+		});
+
+		$("#titlenb").click(function () {
+			ordertagtr(0, 'number');
+		});
+		$("#titlereadcnt").click(function () {
+			ordertagtr(1, 'number');
+		});
+		$("#titleepc").click(function () {
+			ordertagtr(2, 'string');
+		});
+		$("#titleant").click(function () {
+			ordertagtr(3, 'number');
+		});
+		$("#titleemddata").click(function () {
+			ordertagtr(4, 'string');
+		});
+		$("#titlepotl").click(function () {
+			ordertagtr(5, 'string');
+		});
+		$("#titlerssi").click(function () {
+			ordertagtr(6, 'number');
+		});
+        $("#titlefreq").click(function () {
+            ordertagtr(7, 'number');
+		});
+        $("#titlerevd").click(function () {
+            ordertagtr(8, 'number');
+		});
+        $("#titleftm").click(function () {
+            ordertagtr(9, 'number');
+		});
+        $("#titleltm").click(function () {
+            ordertagtr(10, 'number');
+        });
+		$(".sorttitle").mouseleave(function () {
+			$(this).css('cursor', 'default');
+		});
+		$(".sorttitle").mouseenter(function () {
+			if (isinventory == 0 && tottagcount > 0)
+				$(this).css('cursor', 'pointer');
+		});
+
+	});
+
+	var tagdic = new Array();
+	var tottagcount = 0;
+
+	var gettagscycle = 500;
+	var isinventory = 0;
+	var isstopasyncinv = 1;
+
+
+	function cleartaglist() {
+		$("tr").remove(".tagitem");
+		tottagcount = 0;
+		$("#totaltagcnt")[0].innerHTML = 'Total Tags:&nbsp;&nbsp;&nbsp;0000';
+		tagdic = [];
+	}
+
+	function enablestartinvbtn() {
+		$("#btnstartinv")[0].removeAttribute("disabled");
+		$("#btnstartinv").attr("class", "");
+	}
+
+	function disablestartinvbtn() {
+		$("#btnstartinv").attr("disabled", "disabled");
+		$("#btnstartinv").attr("class", "disabled-btn");
+	}
+
+	function gettags() {
+        $.ajax({
+            data: '',
+            type: "get",
+            contentType: "application/json; charset=utf-8",
+            url: "https://YOUR_BACKEND_URL.onrender.com/",
+            success: function (result) {
+				var i;
+                if (result.gpistates != null)
+                    $("#gpistates")[0].innerHTML = 'GPI States:&nbsp;&nbsp;&nbsp;' + result.gpistates;
+                if (result.hbcount != null)
+                    $("#hbcount")[0].innerHTML = 'Heartbeat:&nbsp;&nbsp;&nbsp;' + result.hbcount;
+                if (result.devstate != null)
+                    $("#devstate")[0].innerHTML = 'Device State:&nbsp;&nbsp;&nbsp;' + result.devstate;
+
+                for (i = 0; i < result.tags.length; ++i) {
+                    addtag(result.tags[i]);
+				}
+				if (isinventory == 1)
+					setTimeout(gettags, gettagscycle);
+				else {
+                    enablestartinvbtn();
+					showNumber(tottagcount);
+                    setTimeout(hideNumber, 1300);
+                }
+
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+				alert('Request Failed: ' + textStatus);
+				enablestartinvbtn();
+            }
+        });
+	}
+
+	function startinventory() {
+        disablestartinvbtn();
+        isinventory = 1;
+        gettags();
+	}
+
+	function stopinventory() {
+		if(isinventory == 1)
+			isinventory = 0;
+	}
+
+	function PrefixInteger(num, length) {
+		return(Array(length).join('0') + num).slice(-length);
+	}
+
+	function addtag(tag) {
+		var tagline = tagdic[tag.ep];
+		if(tagline == null) {
+			var newline = document.createElement("tr");
+			newline.setAttribute('class', 'tagitem');
+
+			var itindex = document.createElement("td");
+			itindex.innerHTML = tottagcount;
+			newline.appendChild(itindex);
+
+
+			var itreadcnt = document.createElement("td");
+			if (tag.hasOwnProperty('rc'))
+				itreadcnt.innerHTML = tag.rc;
+			else
+				itreadcnt.innerHTML = '';
+			newline.appendChild(itreadcnt);
+
+			var itepc = document.createElement("td");
+			itepc.setAttribute('title', tag.ep);
+			itepc.innerHTML = tag.ep;
+			newline.appendChild(itepc);
+
+			var itantid = document.createElement("td");
+            if (tag.hasOwnProperty('at'))
+				itantid.innerHTML = tag.at;
+			else
+                itantid.innerHTML = '';
+			newline.appendChild(itantid);
+
+			var itbank_data = document.createElement("td");
+			if (tag.hasOwnProperty('bd')) {
+				itbank_data.innerHTML = tag.bd;
+                if (tag.bd != '')
+                    itbank_data.setAttribute('title', tag.bd);
+			}
+			else
+                itbank_data.innerHTML = '';
+			newline.appendChild(itbank_data);
+
+			var itpotl = document.createElement("td");
+			if (tag.hasOwnProperty('pt')) {
+				if (tag.pt == 5)
+					itpotl.innerHTML = 'GEN2';
+				else
+					itpotl.innerHTML = '180006B';
+			} else
+				itpotl.innerHTML = '';
+			newline.appendChild(itpotl);
+
+			var itrssi = document.createElement("td");
+			if (tag.hasOwnProperty('ri'))
+				itrssi.innerHTML = tag.ri;
+			else
+				itrssi.innerHTML = '';
+			newline.appendChild(itrssi);
+
+            var itfreq = document.createElement("td");
+            if (tag.hasOwnProperty('fq'))
+                itfreq.innerHTML = tag.fq;
+            else
+                itfreq.innerHTML = '';
+			newline.appendChild(itfreq);
+
+            var itres = document.createElement("td");
+			if (tag.hasOwnProperty('rv')) {
+                var xw1 = (((tag.rv & 0xffff0000) >> 16) / 4096.0 * 360).toFixed(1);
+                var xw2 = ((tag.rv & 0x0000ffff) / 4096.0 * 360).toFixed(1);
+                itres.innerHTML =  xw1 + '/' + xw2;
+            }	else
+                itres.innerHTML = '';
+            newline.appendChild(itres);
+
+            var itfirstm = document.createElement("td");
+            if (tag.hasOwnProperty('ft'))
+                itfirstm.innerHTML = tag.ft;
+            else
+                itfirstm.innerHTML = '';
+            newline.appendChild(itfirstm);
+
+            var itlasttm = document.createElement("td");
+            if (tag.hasOwnProperty('lt'))
+                itlasttm.innerHTML = tag.lt;
+            else
+                itlasttm.innerHTML = '';
+            newline.appendChild(itlasttm);
+
+			tagdic[tag.ep] = newline;
+			tottagcount++;
+			$("#taglist").append(newline);
+			$("#totaltagcnt")[0].innerHTML = 'Total Tags:&nbsp;&nbsp;&nbsp;' + PrefixInteger(tottagcount, 4);
+		} else {
+			if (tag.hasOwnProperty('rc')) {
+                var readcnt = parseInt(tagline.childNodes[1].innerHTML) + tag.rc;
+                tagline.childNodes[1].innerHTML = readcnt;
+            }
+            if (tag.hasOwnProperty('at'))
+				tagline.childNodes[3].innerHTML = tag.at;
+			if (tag.hasOwnProperty('bd'))
+				tagline.childNodes[4].innerHTML = tag.bd;
+            if (tag.hasOwnProperty('ri'))
+				tagline.childNodes[6].innerHTML = tag.ri;
+            if (tag.hasOwnProperty('fq'))
+				tagline.childNodes[7].innerHTML = tag.fq;
+			if (tag.hasOwnProperty('rv')) {
+                var xw1 = (((tag.rv & 0xffff0000) >> 16) / 4096.0 * 360).toFixed(1);
+                var xw2 = ((tag.rv & 0x0000ffff) / 4096.0 * 360).toFixed(1);
+                tagline.childNodes[8].innerHTML = xw1 + '/' + xw2;
+            }				
+            if (tag.hasOwnProperty('ft'))
+				tagline.childNodes[9].innerHTML = tag.ft;
+            if (tag.hasOwnProperty('lt'))
+                tagline.childNodes[10].innerHTML = tag.lt;
+		}
+	}
+
+	function ordertagtr(index, type) {
+		if(isinventory == 1)
+			return;
+		var tmptagarr = [];
+		for(epc in tagdic) {
+			tmptagarr.push(tagdic[epc]);
+		}
+		if(type == 'number') {
+			tmptagarr.sort(function(a, b) {
+				var ln = parseInt(a.childNodes[index].innerHTML);
+				var rn = parseInt(b.childNodes[index].innerHTML);
+				return ln - rn;
+			});
+		} else {
+			tmptagarr.sort(function(a, b) {
+				if(a.childNodes[index].innerHTML == b.childNodes[index].innerHTML)
+					return 0;
+				else if(a.childNodes[index].innerHTML > b.childNodes[index].innerHTML)
+					return 1;
+				else
+					return -1;
+			});
+		}
+
+		$("tr").remove(".tagitem");
+		for(var i = 0; i < tmptagarr.length; ++i)
+			$("#taglist").append(tmptagarr[i]);
+	}
+</script>

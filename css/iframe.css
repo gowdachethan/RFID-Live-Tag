@@ -1,0 +1,372 @@
+html,body{
+    width: 100%;
+    height: 100%;
+}
+.box{
+    width: 100%;
+    height: 100%;
+    min-width: 600px;
+    background: #fafafb;
+    position: relative;
+}
+.top-title{
+    border-bottom: 6px solid #dfdfdf;
+    padding: 4px 0 ;
+    background: #eaf8fe;
+}
+.top-title select{
+    height: 26px;
+    width: 200px;
+    border: 1px solid #dfdfdf;
+    border-radius: 5px;
+    color: #888888;
+    font: 14px "微软雅黑";
+}
+.top-title p,.content-title p{
+    color: #2d2d2d;
+    font: bold 16px "微软雅黑";
+    margin-left: 25px;
+}
+.content-box{
+    margin-top: 16px;
+}
+.content-title{
+    border-bottom: 1px solid #dfdfdf;
+    padding: 5px 0 ;
+}
+.content-main{
+    margin-top: 16px;
+    border: 1px solid #c8ebfb;
+    background: #ffffff;
+}
+.main-top{
+    height: 36px;
+    background: #eaf8fe;
+}
+.main-top .triangle_toggle{
+    float: left;
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent transparent #666666;
+    margin-left: 15px;
+    margin-top: 12px;
+}
+.main-top .triangle_toggle.open{
+    margin-top:14px;
+    border-color:#666666 transparent transparent transparent;
+}
+.main-top p{
+    float: right;
+    margin-right: 25px;
+    color: #0077c8;
+    font:16px  "微软雅黑";
+    line-height: 25px;
+}
+.main-top select{
+    height: 26px;
+    width: 200px;
+    border: 1px solid #dfdfdf;
+    border-radius: 5px;
+    color: #888888;
+    font: 14px "微软雅黑";
+}
+.main-message{
+    margin: 16px 18px 16px 25px;
+}
+.main-message .child-message{
+    background: #eaf8fe;
+    display: table;
+    width: 100%;
+    border-bottom: 1px solid #FFFFFF;
+}
+.main-message .child-message:last-child{
+    border-bottom: none;
+}
+.child-message .mess-name{
+    display: table-cell;
+    width: 270px;
+    vertical-align: middle;
+    background: #cfeaf6;
+    color: #666666;
+    font: 14px "微软雅黑";
+    padding-left: 25px;
+    border-right: 1px solid #ffffff;
+}
+.child-message .mess-value{
+    float: left;
+    width: 100%;
+    max-width: 100%;
+    color: #666666;
+    font: 14px '微软雅黑';
+    background: #daf1fc;
+}
+.child-message .mess-value p{
+    padding: 5px 10px;
+}
+.child-message .mess-value span{
+    font-weight: bold;
+}
+.child-message .mess-value.orange{
+    color: #e87f18;
+}
+.child-message .mess-value.green{
+    color: #0cb104;
+}
+/*盘存标签页面*/
+.content-table{
+    position: relative;
+    width: 99.8%;
+    height: 99.7%;
+    border: 1px solid #c8ebfb;
+}
+.table-box{
+    position: absolute;
+    top: 50px;
+    left: 30px;
+    right: 20px;
+    bottom: 6px;
+    overflow-y: scroll;
+}
+.table-box table{
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+.table-head{
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #eaf8fe;
+    z-index: 10;
+}
+.table-box .table-head thead tr{
+    height: 48px;
+}
+.table-box .table-head thead th{
+    color: #2d2d2d;
+    font: 14px "微软雅黑";
+    border: 1px solid #dfdfdf;
+}
+.table-box  .table-body tr{
+    height: 26px;
+}
+.table-box  .table-body tr:nth-child(even){
+    background: #fcfcfc;
+}
+.table-box .table-body tbody td{
+    color: #666666;
+    font: 16px "微软雅黑";
+    border: 1px solid #dfdfdf;
+    text-align: center;
+    max-width: 150px;
+    min-width: 50px;
+    white-space: nowrap;
+    overflow: hidden;
+    word-break: break-all;
+    text-overflow: ellipsis;
+}
+.table-box .table-body tbody tr:first-child td{
+    border-top: none;
+}
+.table-body{
+    position:absolute;
+    top: 49px;
+    left: 0;
+    bottom: 6px;
+}
+.bottom-btn{
+    float: left;
+}
+.bottom-btn input{
+
+    width: 90px;
+    height: 26px;
+    color: #ffffff;
+    font: 16px "微软雅黑";
+    border: none;
+    margin-left: 25px;
+    background: #0077c8;
+    cursor: pointer;
+}
+.param-message{
+    margin: 14px 17px 20px 28px;
+    border: 1px solid #dfdfdf;
+
+}
+.param-message.block{
+    display: block;
+}
+.param-message.none{
+    display: none;
+}
+.param-message .param-cell{
+    display: table;
+    width: 100%;
+    border-bottom: 1px solid #dfdfdf;
+}
+.param-message .param-cell:last-child{
+    border-bottom: none;
+}
+.param-message .param-cell .cell-left{
+    width: 245px;
+    display: table-cell;
+    vertical-align: middle;
+    background: #eaf8fe;
+    color: #666666;
+    font: 14px "微软雅黑";
+    padding-left: 25px;
+    border-right: 1px solid #dfdfdf;
+}
+.param-cell .param-area{
+    float: left;
+    width: 80%;
+    max-width: 80%;
+    margin-top: 3px;
+    margin-left: 20px;
+    margin-bottom: 3px;
+}
+.param-area textarea{
+    width: 100%;
+    overflow: auto;
+    color: #888888;
+    max-width: 99.7%;
+	height: 100px;
+	max-height: 100px;
+    font: 14px "微软雅黑";
+    box-sizing: border-box;
+    border: 1px solid #DFDFDF;
+    border-radius: 5px;
+}
+.param-cell .param-area input.text{
+    height: 26px;
+    width: 100%;
+    border: 1px solid #dfdfdf;
+    border-radius: 5px;
+    color: #888888;
+    font: 14px "微软雅黑";
+    padding-left: 14px;
+    box-sizing: border-box;
+}
+.param-cell .param-area label{
+    color: #888888;
+    font: 14px "微软雅黑";
+    margin-left: 6px;
+}
+.param-cell .param-area .area-box{
+    width: 99.4%;
+    border: 1px solid #dfdfdf;
+    border-radius: 5px;
+}
+.param-cell .param-area input.text1{
+    height: 24px;
+    width: 70%;
+    border: 1px solid #dfdfdf;
+    padding-left: 10px;
+    border-radius: 5px;
+    color: #888888;
+    font: 14px "微软雅黑";
+    margin-top: 2px;
+    margin-left: 8px;
+    margin-bottom: 2px;
+}
+.param-cell .param-area select[name=default]{
+    height: 26px;
+    width: 100%;
+    border: 1px solid #dfdfdf;
+    border-radius: 5px;
+    color: #888888;
+    font: 14px "微软雅黑";
+    padding-left: 10px;
+}
+.checkbox-area{
+    padding: 5px 0;
+}
+.checkbox-area li{
+    float: left;
+    width: 90px;
+    margin-top: 6px;
+    margin-right: 18px;
+}
+.checkbox-area li .box-check{
+    float: left;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #505050;
+    border-radius: 9px;
+    cursor: pointer;
+    position: relative;
+    margin-top: -1px;
+}
+.checkbox-area li .square-check{
+    float: left;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #505050;
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+}
+.checkbox-area li .box-check input{
+     float: left;
+     width: 16px;
+     height: 16px;
+     border-radius: 9px;
+     opacity: 0;
+ }
+.checkbox-area li .square-check input{
+    float: left;
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+    opacity: 0;
+}
+.checkbox-area li .check-mess{
+    float: left;
+    color: #666666;
+    font: 14px "微软雅黑";
+    margin-left: 15px;
+    margin-top: -1px;
+}
+.checkbox-area li .box-check.click{
+    border: 1px solid #0077c8;
+    background: #0077c8;
+}
+.checkbox-area li .square-check.click{
+    border: 1px solid #0077c8;
+    background: #0077c8;
+}
+.box-check.click .icon-draw{
+    width: 12px;
+    height: 8px;
+    position: absolute;
+    top: 4px;
+    left: 2px;
+    background: url(../images/icon-1.png) no-repeat -199px -31px;
+}
+.square-check.click .icon-draw{
+    width: 12px;
+    height: 8px;
+    position: absolute;
+    top: 4px;
+    left: 2px;
+    background: url(../images/icon-1.png) no-repeat -199px -31px;
+}
+
+.table-box .table-body tbody tr:first-child td{
+    border-top: none;
+}
+input.disabled-btn {
+    background: #D1D1D1;
+}
+
+.textnoselect {
+-moz-user-select:none;/*火狐*/
+
+-webkit-user-select:none;/*webkit浏览器*/
+
+-ms-user-select:none;/*IE10*/
+
+-khtml-user-select:none;/*早期浏览器*/
+
+user-select:none;
+}
