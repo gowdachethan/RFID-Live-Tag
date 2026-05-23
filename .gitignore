@@ -1,0 +1,10 @@
+# Ignore legacy demo folder with large executables and zip files
+tag_web_server/
+
+# Node modules
+node_modules/
+backend/node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
