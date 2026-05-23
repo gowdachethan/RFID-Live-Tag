@@ -15,7 +15,7 @@ httpServer.keepAliveTimeout = 30 * 1000;
 
 var tabTags = new HashMap();
 function InsertTags(tags) {
-    if (tags.length > 0) {
+    if (tags && tags.length > 0) {
         tags.forEach(tag => {
             if (tag.hasOwnProperty('ep')) {
                 if (tabTags.has(tag.ep)) {
@@ -78,27 +78,56 @@ app.use(function(req, res, next) {
     next();
 });
 
-// Endpoint to receive data from RFID board (SDL1010/E710)
-app.post('/reader', function(req, res) {
-    console.log("Data from Reader:", req.body);
+// Common handler for both / and /reader endpoints
+function handleReaderUpload(req, res) {
+    console.log("Data from Reader:", JSON.stringify(req.body));
 
+    if (!req.body) {
+        return res.end();
+    }
+
+    // 1. CRITICAL STEP: Handle Time Sync Request from the Reader
+    if (req.body.event_type === 'sync_time_req') {
+        var timeSecond = Math.floor(Date.now()); // Send current epoch milliseconds
+        var sync_time = {
+            command_type: "sync_time",
+            command_data: timeSecond
+        };
+        console.log("Responded to sync_time_req with:", JSON.stringify(sync_time));
+        return res.json(sync_time); // Respond with sync_time command as required by the reader board
+    }
+
+    // 2. Handle Tag Scans
     if (req.body.event_type == 'tag_read' || req.body.event_type == 'tag_coming') {
         InsertTags(req.body.event_data);
     }
-    else if (req.body.event_type == 'heart_beat')
+    // 3. Handle Heartbeats
+    else if (req.body.event_type == 'heart_beat') {
         hbcount = req.body.event_data;
+    }
+    // 4. Handle GPI Changes
     else if (req.body.event_type == 'gpi_changed') {
-        var tmpstr = '';
-        req.body.event_data.gpi_states.forEach(function (gst) {
-            tmpstr += gst.state;
-        });
-        gpistates = tmpstr;
+        if (req.body.event_data && req.body.event_data.gpi_states) {
+            var tmpstr = '';
+            req.body.event_data.gpi_states.forEach(function (gst) {
+                tmpstr += gst.state;
+            });
+            gpistates = tmpstr;
+        }
     }
+    // 5. Handle Exceptions
     else if (req.body.event_type == 'reader_exception') {
-        devstate = 'code:' + req.body.event_data.err_code + ' info:' + req.body.event_data.err_string;
+        if (req.body.event_data) {
+            devstate = 'code:' + req.body.event_data.err_code + ' info:' + req.body.event_data.err_string;
+        }
     }
+    
     res.end();
-});
+}
+
+// Accept hardware uploads on both the root / and /reader paths to support all hardware configurations
+app.post('/reader', handleReaderUpload);
+app.post('/', handleReaderUpload);
 
 // Endpoint for frontend to fetch tag logs
 app.get('/', function (req, res) {
