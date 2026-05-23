@@ -1,34 +1,161 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XP RFID Industrial Dashboard</title>
+    <!-- Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Link CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="brand-section">
+                <div class="brand-badge">XP</div>
+                <div class="brand-text">
+                    <h1>RFID INDUSTRIAL</h1>
+                    <span class="sub-brand">XP ROBOTICS SYSTEM</span>
+                </div>
+            </div>
+            <div class="control-actions">
+                <button id="btnClear" class="btn btn-red">CLEAR SYSTEM</button>
+                <button id="btnTest" class="btn btn-blue">TEST TAG</button>
+                <button id="btnExport" class="btn btn-green">EXPORT CSV</button>
+                <button id="btnRefresh" class="btn btn-outline">REFRESH</button>
+            </div>
+        </header>
 
-	<head lang="en">
-		<meta charset="UTF-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<title></title>
-		<link rel="stylesheet" href="css/common.css" />
-		<link rel="stylesheet" href="css/index.css" />
-		<link rel="stylesheet" href="css/popup.css" />
-		<script src="js/jquery.min.js"></script>
-		<script src="js/popup.js"></script>
-		<script src="js/utility.js"></script>
-	</head>
+        <!-- MAIN LAYOUT -->
+        <main class="main-content">
+            <!-- BAYS GRID (B1 to B7) -->
+            <section class="bays-grid">
+                <!-- B1 -->
+                <div class="bay-card" id="bay-1">
+                    <div class="bay-header">
+                        <span class="bay-status status-ready">STATUS: READY</span>
+                        <span class="bay-id">B1</span>
+                    </div>
+                    <div class="bay-body">
+                        <div class="bay-duration">DURATION: <span class="duration-val">0s</span></div>
+                        <div class="bay-tag">TAG: <span class="tag-val">--</span></div>
+                    </div>
+                </div>
+                <!-- B2 -->
+                <div class="bay-card" id="bay-2">
+                    <div class="bay-header">
+                        <span class="bay-status status-ready">STATUS: READY</span>
+                        <span class="bay-id">B2</span>
+                    </div>
+                    <div class="bay-body">
+                        <div class="bay-duration">DURATION: <span class="duration-val">0s</span></div>
+                        <div class="bay-tag">TAG: <span class="tag-val">--</span></div>
+                    </div>
+                </div>
+                <!-- B3 -->
+                <div class="bay-card" id="bay-3">
+                    <div class="bay-header">
+                        <span class="bay-status status-ready">STATUS: READY</span>
+                        <span class="bay-id">B3</span>
+                    </div>
+                    <div class="bay-body">
+                        <div class="bay-duration">DURATION: <span class="duration-val">0s</span></div>
+                        <div class="bay-tag">TAG: <span class="tag-val">--</span></div>
+                    </div>
+                </div>
+                <!-- B4 -->
+                <div class="bay-card" id="bay-4">
+                    <div class="bay-header">
+                        <span class="bay-status status-ready">STATUS: READY</span>
+                        <span class="bay-id">B4</span>
+                    </div>
+                    <div class="bay-body">
+                        <div class="bay-duration">DURATION: <span class="duration-val">0s</span></div>
+                        <div class="bay-tag">TAG: <span class="tag-val">--</span></div>
+                    </div>
+                </div>
+                <!-- B5 -->
+                <div class="bay-card" id="bay-5">
+                    <div class="bay-header">
+                        <span class="bay-status status-ready">STATUS: READY</span>
+                        <span class="bay-id">B5</span>
+                    </div>
+                    <div class="bay-body">
+                        <div class="bay-duration">DURATION: <span class="duration-val">0s</span></div>
+                        <div class="bay-tag">TAG: <span class="tag-val">--</span></div>
+                    </div>
+                </div>
+                <!-- B6 -->
+                <div class="bay-card" id="bay-6">
+                    <div class="bay-header">
+                        <span class="bay-status status-ready">STATUS: READY</span>
+                        <span class="bay-id">B6</span>
+                    </div>
+                    <div class="bay-body">
+                        <div class="bay-duration">DURATION: <span class="duration-val">0s</span></div>
+                        <div class="bay-tag">TAG: <span class="tag-val">--</span></div>
+                    </div>
+                </div>
+                <!-- B7 -->
+                <div class="bay-card" id="bay-7">
+                    <div class="bay-header">
+                        <span class="bay-status status-ready">STATUS: READY</span>
+                        <span class="bay-id">B7</span>
+                    </div>
+                    <div class="bay-body">
+                        <div class="bay-duration">DURATION: <span class="duration-val">0s</span></div>
+                        <div class="bay-tag">TAG: <span class="tag-val">--</span></div>
+                    </div>
+                </div>
+            </section>
 
-	<body>
-		<div class="box clearfix">
-			<div class="top-bar">
-				<div class="logo-box">
-					<img src="images/top-logo.png" alt="" />
-				</div>
-				<div class="title-box">
-					<div class="title-text" style="width: 88%; float: left;">RFID Reader Active Mode Upload Demo</div>								
-				</div>
-			</div>
+            <!-- LIVE MONITORING TABLE -->
+            <section class="monitoring-section">
+                <h2 class="section-title">LIVE TAG MONITORING STREAM</h2>
+                <div class="table-container">
+                    <table class="live-table" id="tagsTable">
+                        <thead>
+                            <tr>
+                                <th>TAG ID (EPC)</th>
+                                <th>ANTENNA</th>
+                                <th>READS</th>
+                                <th>RSSI</th>
+                                <th>ENTRY TIMESTAMP</th>
+                                <th>EXIT TIMESTAMP</th>
+                                <th>STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tagStreamBody">
+                            <!-- Rows will be injected here dynamically -->
+                        </tbody>
+                    </table>
+                    <div class="no-data-msg" id="noDataMessage">No active RFID scans detected. Click "TEST TAG" or scan physical tags to begin.</div>
+                </div>
+            </section>
+        </main>
 
-			<div class="contain">
-				<iframe src="TagInventory.html" id="framehtml" name="mainFrame" class="ifrSrc" frameborder="0" scrolling="auto">
-    </iframe>
-			</div>
-		</div>
-	</body>
+        <!-- FOOTER -->
+        <footer class="footer">
+            <div class="footer-left">
+                <span>MODE: CONTINUOUS SCAN</span>
+                <span class="protocol-badge">PROTOCOL: Socket.io/High-Speed</span>
+            </div>
+            <div class="footer-center">
+                <span id="connectionStatus" class="connection-status offline">
+                    <span class="status-dot"></span> <span class="status-text">CONNECTING TO SERVER...</span>
+                </span>
+            </div>
+            <div class="footer-right">
+                <span id="clock" class="clock-display">00:00:00 PM</span>
+            </div>
+        </footer>
+    </div>
 
+    <!-- Main JavaScript Application -->
+    <script src="app.js"></script>
+</body>
 </html>

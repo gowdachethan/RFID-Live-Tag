@@ -1,0 +1,464 @@
+/* XP RFID INDUSTRIAL STYLESHEET */
+:root {
+    /* Color Palette */
+    --bg-app: #07090e;
+    --bg-card: #0c1017;
+    --border-color: rgba(255, 255, 255, 0.04);
+    --border-color-hover: rgba(255, 255, 255, 0.08);
+    
+    /* Brand Accent Colors */
+    --brand-blue: #1c75ff;
+    --brand-blue-hover: #155bc5;
+    
+    --accent-red: #ea3c48;
+    --accent-red-hover: #c42934;
+    
+    --accent-green: #10b981;
+    --accent-green-hover: #059669;
+    
+    /* Text Colors */
+    --text-primary: #ffffff;
+    --text-secondary: #8e9cae;
+    --text-muted: #4e5d78;
+    
+    /* Font Families */
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Reset and Core Layout */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    height: 100vh;
+}
+
+/* Main Container */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 16px 24px 8px 24px;
+}
+
+/* HEADER SECTION */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.brand-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-badge {
+    background: var(--brand-blue);
+    color: var(--text-primary);
+    font-weight: 800;
+    font-size: 20px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 16px rgba(28, 117, 255, 0.2);
+}
+
+.brand-text h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+}
+
+.sub-brand {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+}
+
+/* Control Action Buttons */
+.control-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-red {
+    background-color: var(--accent-red);
+    color: var(--text-primary);
+}
+.btn-red:hover {
+    background-color: var(--accent-red-hover);
+    box-shadow: 0 0 12px rgba(234, 60, 72, 0.2);
+}
+
+.btn-blue {
+    background-color: var(--brand-blue);
+    color: var(--text-primary);
+}
+.btn-blue:hover {
+    background-color: var(--brand-blue-hover);
+    box-shadow: 0 0 12px rgba(28, 117, 255, 0.25);
+}
+
+.btn-green {
+    background-color: var(--accent-green);
+    color: var(--text-primary);
+}
+.btn-green:hover {
+    background-color: var(--accent-green-hover);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 1px solid var(--text-muted);
+    color: var(--text-secondary);
+}
+.btn-outline:hover {
+    border-color: var(--text-secondary);
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+/* MAIN CONTENT */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px 0;
+    min-height: 0; /* Ensures proper scroll behaviour inside main content */
+}
+
+/* BAYS GRID */
+.bays-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+/* Make B4 span to fit design, or simple layout */
+@media(max-width: 1200px) {
+    .bays-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+@media(max-width: 768px) {
+    .bays-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.bay-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bay-card:hover {
+    border-color: var(--border-color-hover);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.bay-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background-color: transparent;
+    transition: background-color 0.25s ease;
+}
+
+/* Active Bay Border Highlight */
+.bay-card.active-bay::after {
+    background-color: var(--brand-blue);
+    box-shadow: 0 0 10px var(--brand-blue);
+}
+
+.bay-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.bay-status {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.status-ready {
+    color: var(--text-secondary);
+}
+
+.status-active {
+    color: var(--brand-blue);
+    animation: pulse 1.5s infinite alternate;
+}
+
+.bay-id {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.15);
+    transition: color 0.25s ease;
+}
+
+.bay-card.active-bay .bay-id {
+    color: var(--brand-blue);
+}
+
+.bay-duration {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+}
+
+.duration-val {
+    font-family: var(--font-mono);
+    font-weight: 700;
+}
+
+.bay-tag {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tag-val {
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+}
+
+.bay-card.active-bay .tag-val {
+    color: var(--text-primary);
+}
+
+/* LIVE MONITORING SECTION */
+.monitoring-section {
+    flex: 1;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* Crucial for vertical flex overflow scrolling */
+}
+
+.section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.8px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+}
+
+.table-container {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    position: relative;
+}
+
+/* Scrollbar styling */
+.table-container::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.table-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+.table-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+}
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.live-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    text-align: left;
+}
+
+.live-table th {
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-card);
+    z-index: 1;
+}
+
+.live-table td {
+    padding: 12px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.live-table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.live-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.01);
+}
+
+.tag-id-cell {
+    font-family: var(--font-mono) !important;
+    font-weight: 600 !important;
+    color: #e5c07b !important; /* Gold EPC color for readability */
+}
+
+.table-status-active {
+    color: var(--brand-blue);
+    font-weight: 700 !important;
+}
+
+.table-status-left {
+    color: var(--text-muted);
+}
+
+.no-data-msg {
+    color: var(--text-muted);
+    font-size: 11px;
+    text-align: center;
+    padding: 48px 0;
+    display: block;
+}
+
+/* FOOTER SECTION */
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0 4px 0;
+    border-top: 1px solid var(--border-color);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
+.footer-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.protocol-badge {
+    color: var(--text-secondary);
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.connection-status.online {
+    color: var(--accent-green);
+}
+.connection-status.online .status-dot {
+    background-color: var(--accent-green);
+    box-shadow: 0 0 8px var(--accent-green);
+}
+
+.connection-status.offline {
+    color: var(--accent-red);
+}
+.connection-status.offline .status-dot {
+    background-color: var(--accent-red);
+    box-shadow: 0 0 8px var(--accent-red);
+    animation: flash 1s infinite alternate;
+}
+
+.clock-display {
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    font-size: 11px;
+}
+
+/* KEYFRAMES ANIMATIONS */
+@keyframes pulse {
+    from {
+        opacity: 0.6;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes flash {
+    from {
+        opacity: 0.3;
+    }
+    to {
+        opacity: 1;
+    }
+}
