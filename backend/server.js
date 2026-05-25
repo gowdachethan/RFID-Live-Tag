@@ -16,7 +16,6 @@ httpServer.keepAliveTimeout = 30 * 1000;
 var tabTags = new HashMap();
 
 // UNIVERSAL RFID TAG PARSER
-// Maps any format (short or long JSON keys) from the reader dynamically
 function InsertTags(tags) {
     if (tags && tags.length > 0) {
         tags.forEach(tag => {
@@ -60,7 +59,18 @@ var hbcount = 0;
 var gpistates = '';
 var devstate = '0';
 
-app.use(bodyParser.json());
+// 1. DIAGNOSTIC LOGGER MIDDLEWARE
+// This prints the exact headers and requests to Render logs so you can see exactly what the reader is sending!
+app.use(function(req, res, next) {
+    console.log(`>>> [${new Date().toISOString()}] Received ${req.method} on ${req.url}`);
+    console.log(">>> Request Headers:", JSON.stringify(req.headers));
+    next();
+});
+
+// 2. ROBUST BODY PARSERS
+// Force Express to parse JSON even if the reader sends an incorrect Content-Type header (e.g. text/plain or missing)
+app.use(bodyParser.json({ type: '*/*' }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Enable CORS for all requests to ensure frontend can access backend
 app.use(function(req, res, next) {
@@ -75,9 +85,10 @@ app.use(function(req, res, next) {
 
 // Common handler for both / and /reader endpoints
 function handleReaderUpload(req, res) {
-    console.log("Data from Reader:", JSON.stringify(req.body));
+    console.log(">>> Parsed Request Body:", JSON.stringify(req.body));
 
-    if (!req.body) {
+    if (!req.body || Object.keys(req.body).length === 0) {
+        console.warn(">>> WARNING: Received empty body from reader! Body parsing might have failed.");
         return res.end();
     }
 
@@ -88,17 +99,19 @@ function handleReaderUpload(req, res) {
             command_type: "sync_time",
             command_data: timeSecond
         };
-        console.log("Responded to sync_time_req with:", JSON.stringify(sync_time));
+        console.log(">>> Responded to sync_time_req with:", JSON.stringify(sync_time));
         return res.json(sync_time);
     }
 
     // 2. Handle Tag Scans
     if (req.body.event_type == 'tag_read' || req.body.event_type == 'tag_coming') {
         InsertTags(req.body.event_data);
+        console.log(`>>> Successfully processed ${req.body.event_data ? req.body.event_data.length : 0} tags.`);
     }
     // 3. Handle Heartbeats
     else if (req.body.event_type == 'heart_beat') {
         hbcount = req.body.event_data;
+        console.log(">>> Heartbeat received:", hbcount);
     }
     // 4. Handle GPI Changes
     else if (req.body.event_type == 'gpi_changed') {
@@ -108,12 +121,14 @@ function handleReaderUpload(req, res) {
                 tmpstr += gst.state;
             });
             gpistates = tmpstr;
+            console.log(">>> GPI changed:", gpistates);
         }
     }
     // 5. Handle Exceptions
     else if (req.body.event_type == 'reader_exception') {
         if (req.body.event_data) {
             devstate = 'code:' + req.body.event_data.err_code + ' info:' + req.body.event_data.err_string;
+            console.log(">>> Reader exception:", devstate);
         }
     }
     
