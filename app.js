@@ -13,7 +13,7 @@ let clockTimer = null;
 
 // Mock Data EPC Generator (for Test Tag feature)
 const mockEPCs = [
-    "E2801191200073D4D1A0512A",
+    "E2806894000050196EF39449",
     "E2801191200073D4D1A0512B",
     "E2801191200073D4D1A0512C",
     "E2801130200056F2D4C13401",
@@ -85,10 +85,35 @@ async function fetchTagData(isManual = false) {
     renderUI();
 }
 
+// Helper: Formats string/epoch-ms/epoch-s timestamps from the reader beautifully
+function formatTimestamp(ts) {
+    if (!ts) return new Date().toLocaleTimeString([], { hour12: false });
+    
+    // If it's already a formatted string containing colons (like "2024-11-21 19:15:38" or "19:15:38")
+    if (typeof ts === 'string' && ts.includes(':')) {
+        if (ts.includes(' ') || ts.includes('T')) {
+            const parts = ts.split(/[ T]/);
+            return parts[1] ? parts[1].substring(0, 8) : ts;
+        }
+        return ts;
+    }
+    
+    // If it's a numeric timestamp (epoch seconds or milliseconds)
+    let milliseconds = parseInt(ts);
+    if (!isNaN(milliseconds)) {
+        // Convert epoch seconds (10 digits) to milliseconds (13 digits)
+        if (milliseconds.toString().length === 10) {
+            milliseconds *= 1000;
+        }
+        return new Date(milliseconds).toLocaleTimeString([], { hour12: false });
+    }
+    
+    return new Date().toLocaleTimeString([], { hour12: false });
+}
+
 // 4. Process Scan Data
 function processTags(tags) {
     const now = Date.now();
-    const timestampStr = new Date().toLocaleTimeString([], { hour12: false });
     
     tags.forEach(tag => {
         const epc = tag.ep || tag.epc;
@@ -98,6 +123,10 @@ function processTags(tags) {
         
         if (!epc) return;
 
+        // Parse and format reader-supplied entry/exit timestamps
+        const entryTimeFormatted = formatTimestamp(tag.ft);
+        const exitTimeFormatted = formatTimestamp(tag.lt);
+
         // Determine if this tag already exists in active logs
         let activeTag = tagLogs.find(t => t.epc === epc && t.status === "ACTIVE");
         
@@ -105,9 +134,9 @@ function processTags(tags) {
             // Update existing active tag
             activeTag.reads += reads;
             activeTag.rssi = rssi;
-            activeTag.lastSeen = now;
-            activeTag.exitTime = timestampStr;
-            activeTag.antenna = antenna; // Update antenna in case it moved
+            activeTag.lastSeen = now; // Use browser time for active timeout calculations
+            activeTag.exitTime = exitTimeFormatted; // Use high-precision reader exit timestamp
+            activeTag.antenna = antenna;
         } else {
             // Create a new active tag row
             activeTag = {
@@ -115,9 +144,9 @@ function processTags(tags) {
                 antenna: antenna,
                 reads: reads,
                 rssi: rssi,
-                entryTime: timestampStr,
-                exitTime: timestampStr,
-                firstSeen: now,
+                entryTime: entryTimeFormatted, // High-precision reader entry timestamp
+                exitTime: exitTimeFormatted,
+                firstSeen: now, // Browser time for local active counter
                 lastSeen: now,
                 status: "ACTIVE"
             };
@@ -144,7 +173,7 @@ function tickActiveDurations() {
                 tag.status = "LEFT";
                 activeTagsByBay[bayId] = null; // Free up the bay
             } else {
-                // Calculate elapsed active duration
+                // Calculate elapsed active duration based on browser ticks
                 tag.durationSeconds = Math.floor((now - tag.firstSeen) / 1000);
             }
         }
@@ -215,12 +244,16 @@ function injectTestTag() {
 
     console.log(`Injecting Mock tag: EPC=${randomEpc} at Bay ${randomBay}`);
 
-    // Form mock tag payload
+    // Form mock tag payload using the exact board structure
     const mockTag = {
-        epc: randomEpc,
-        antenna: randomBay,
-        rssi: randomRssi,
-        read_count: randomReads
+        ep: randomEpc,
+        bd: "",
+        at: randomBay,
+        rc: randomReads,
+        ri: randomRssi,
+        fq: "922.5",
+        ft: Date.now() - 3000,
+        lt: Date.now()
     };
 
     // Feed it to the tag log processor
