@@ -14,48 +14,43 @@ httpServer.listen(PORT, function() {
 httpServer.keepAliveTimeout = 30 * 1000;
 
 var tabTags = new HashMap();
+
+// UNIVERSAL RFID TAG PARSER
+// Maps any format (short or long JSON keys) from the reader dynamically
 function InsertTags(tags) {
     if (tags && tags.length > 0) {
         tags.forEach(tag => {
-            if (tag.hasOwnProperty('ep')) {
-                if (tabTags.has(tag.ep)) {
-                    var tag_ = tabTags.get(tag.ep);
-                    if (tag.hasOwnProperty('bd')) tag_.bd = tag.bd;
-                    if (tag.hasOwnProperty('at')) tag_.at = tag.at;
-                    if (tag.hasOwnProperty('rc')) tag_.rc += tag.rc;
-                    if (tag.hasOwnProperty('fq')) tag_.fq = tag.fq;
-                    if (tag.hasOwnProperty('pt')) tag_.pt = tag.pt;
-                    if (tag.hasOwnProperty('ri')) tag_.ri = tag.ri;
-                    if (tag.hasOwnProperty('rv')) tag_.rv = tag.rv;
-                    if (tag.hasOwnProperty('ft')) tag_.ft = tag.ft;
-                    if (tag.hasOwnProperty('lt')) tag_.lt = tag.lt;
-                } else
-                    tabTags.set(tag.ep, tag);
-            }
-            else if (tag.hasOwnProperty('epc')) {
-                if (tabTags.has(tag.epc)) {
-                    var tag_ = tabTags.get(tag.epc);
-                    tag_.bd = tag.bank_data;
-                    tag_.at = tag.antenna;
-                    tag_.rc += tag.read_count;
-                    tag_.pt = tag.protocol;
-                    tag_.ri = tag.rssi;
-                    tag_.ft = tag.firstseen_timestamp;
-                    tag_.lt = tag.lastseen_timestamp;
-                } else {
-                    var tag_ofm = {};
-                    tag_ofm.ep = tag.epc;
-                    tag_ofm.bd = tag.bank_data;
-                    tag_ofm.at = tag.antenna;
-                    tag_ofm.rc = tag.read_count;
-                    tag_ofm.pt = tag.protocol;
-                    tag_ofm.ri = tag.rssi;
-                    tag_ofm.ft = tag.firstseen_timestamp;
-                    tag_ofm.lt = tag.lastseen_timestamp;
-                    tag_ofm.rv = 0;
-                    tag_ofm.fq = '';
-                    tabTags.set(tag.epc, tag_ofm);
-                }                   
+            // Find EPC / Tag ID (supports ep, epc, tag_id, id)
+            var epc = tag.ep || tag.epc || tag.tag_id || tag.id;
+            if (!epc) return;
+
+            // Normalize fields from reader checkboxes dynamically
+            var normalizedTag = {
+                ep: epc,
+                bd: tag.bd || tag.bank_data || tag.additional_data || tag.data || '',
+                at: parseInt(tag.at || tag.antenna || tag.antenna_number || tag.antenna_id || 1),
+                rc: parseInt(tag.rc || tag.read_count || tag.count || 1),
+                fq: tag.fq || tag.frequency || '',
+                pt: tag.pt || tag.protocol || 5, // default to GEN2
+                ri: parseFloat(tag.ri || tag.rssi || -60),
+                rv: tag.rv || tag.reserve_field || 0,
+                ft: tag.ft || tag.firstseen_timestamp || tag.first_timestamp || new Date().toISOString(),
+                lt: tag.lt || tag.lastseen_timestamp || tag.last_timestamp || new Date().toISOString()
+            };
+
+            // Save/Update in our tabTags HashMap
+            if (tabTags.has(epc)) {
+                var existingTag = tabTags.get(epc);
+                existingTag.bd = normalizedTag.bd;
+                existingTag.at = normalizedTag.at;
+                existingTag.rc += normalizedTag.rc; // Accumulate reads
+                existingTag.fq = normalizedTag.fq;
+                existingTag.pt = normalizedTag.pt;
+                existingTag.ri = normalizedTag.ri;
+                existingTag.rv = normalizedTag.rv;
+                existingTag.lt = normalizedTag.lt; // Update last seen timestamp
+            } else {
+                tabTags.set(epc, normalizedTag);
             }
         });
     }
@@ -86,15 +81,15 @@ function handleReaderUpload(req, res) {
         return res.end();
     }
 
-    // 1. CRITICAL STEP: Handle Time Sync Request from the Reader
+    // 1. Handle Time Sync Request from the Reader
     if (req.body.event_type === 'sync_time_req') {
-        var timeSecond = Math.floor(Date.now()); // Send current epoch milliseconds
+        var timeSecond = Math.floor(Date.now());
         var sync_time = {
             command_type: "sync_time",
             command_data: timeSecond
         };
         console.log("Responded to sync_time_req with:", JSON.stringify(sync_time));
-        return res.json(sync_time); // Respond with sync_time command as required by the reader board
+        return res.json(sync_time);
     }
 
     // 2. Handle Tag Scans
